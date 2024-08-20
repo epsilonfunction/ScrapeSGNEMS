@@ -32,7 +32,7 @@ cookies = {cookie['name']: cookie['value'] for cookie in selenium_cookies}
 #TODO: Consider removing and hardcoding the form action url since it is porbably fixed.
 form_elem = driver.find_element(By.XPATH, "//form[@action='/api/sitecore/DataSync/DataDownload']")
 
-# Construct the query parameters
+# Query Parameters
 params = json.load(open("Parameters.json"))["Parameters"]
 filepath = json.load(open("Parameters.json"))["filepath"]
 
@@ -42,12 +42,11 @@ full_url = f"{form_action_url}?{urlencode(params)}"
 user_agent = driver.execute_script("return navigator.userAgent;")
 headers = {
     'User-Agent': user_agent,
-    'Referer': full_url,  # Add any other headers as needed
+    'Referer': full_url,
 }
 
 response = requests.get(full_url, cookies=cookies, headers=headers)
-
-response
+# TODO: add exception to handle non 200 response
 
 #Overwrites current data. Becareful
 with open(filepath, "wb") as file:
