@@ -1,0 +1,7 @@
+
+requests==2.31.0
+
+Selenium==4.23.0
+
+ipython==8.26.0
+ipykernel==6.29.5
