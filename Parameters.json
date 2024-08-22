@@ -1,8 +1,7 @@
 {"Parameters":
     {"value": "10",
-    "fromDate": "2024-08-15",
-    "toDate": "2024-08-15",
+    "fromDate": "2024-08-22",
+    "toDate": "2024-08-22",
     "tpcValue": "1"},
 "filepath":"./TPCData.csv"
 }
-  

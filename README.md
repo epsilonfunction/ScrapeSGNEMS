@@ -10,7 +10,7 @@ Steps:
     1) "fromDate"
     2) "toDate"
     3) "filepath"
-3) $python Scraper.py
+3) $python TPCScrape.py
 
 Dependencies:
 1) Python 3.11. Probably works for earlier version. Not tested for anything outside of 3.11
