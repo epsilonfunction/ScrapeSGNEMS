@@ -21,6 +21,9 @@ Steps (Python):
 Dependencies:
 1) Python 3.11. Probably works for earlier version. Not tested for anything outside of 3.11
 
-TODO:
-1) Containerisation
-2) Implement test cases
+2) Containerisation
+3) Implement test cases (PRIORITY !!!)
+
+
+2024/12/18: Removed chromedriver from local path for testing purposes
+<!-- C:\Users\00492\chromedriver-win64 -->
