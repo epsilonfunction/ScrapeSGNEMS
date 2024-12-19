@@ -52,10 +52,6 @@ func getChromeVersion() (string, error) {
 	// Trim whitespace and convert to string
 	version := strings.TrimSpace(string(output))
 
-	// Extract major version (first number)
-	// re := regexp.MustCompile(`^(\d+)`)
-	// match := re.FindString(version)
-
 	return version, nil
 }
 
@@ -85,24 +81,17 @@ type KnownGoodVersions struct {
 }
 
 func main() {
-	// Set up Chrome options
-	caps := selenium.Capabilities{"browserName": "chrome"}
-	chromeCaps := chrome.Capabilities{
-		Args: []string{
-			"--headless",
-		},
-	}
-	caps.AddChrome(chromeCaps)
 
 	chromeversion, err := getChromeVersion()
-	if err != nil {
-		panic(err)
-		// fmt.Println("No Chrome Version Found", err)
-		// return
-		os.Exit(1)
-	} else {
-		fmt.Println("Chrome Version : ", chromeversion)
-	}
+
+	// if err != nil {
+	// 	panic(err)
+	// 	// fmt.Println("No Chrome Version Found", err)
+	// 	// return
+	// 	os.Exit(1)
+	// } else {
+	// 	fmt.Println("Chrome Version : ", chromeversion)
+	// }
 
 	response, err := http.Get(chromedriverURL)
 	if err != nil {
@@ -118,16 +107,6 @@ func main() {
 	}
 
 	fmt.Println(reflect.TypeOf(body))
-
-	// err := json.Unmarshal(&body, &data)
-	// if err != nil {
-	// 	log.Fatal("Error decoding JSON:", err)
-	// }
-
-	// var data map[string]interface{}
-	// if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
-	// 	log.Fatal("Error decoding JSON:", err)
-	// }
 
 	var data1 KnownGoodVersions
 
@@ -218,6 +197,15 @@ func main() {
 	os.Remove(tempZipFile.Name())
 	resp.Body.Close()
 	// fmt.Println("Chrome Download at: ", found.Downloads.Chromedriver)
+
+	// Set up Chrome options
+	caps := selenium.Capabilities{"browserName": "chrome"}
+	chromeCaps := chrome.Capabilities{
+		Args: []string{
+			"--headless",
+		},
+	}
+	caps.AddChrome(chromeCaps)
 
 	// Start a Selenium WebDriver server instance
 	service, err := selenium.NewChromeDriverService("./chromedriver.exe", 9515)
