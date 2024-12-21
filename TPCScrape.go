@@ -9,18 +9,15 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"reflect"
 	"regexp"
-	"strings"
 
 	"github.com/tebeka/selenium"
 	"github.com/tebeka/selenium/chrome"
 )
 
 const (
-	nemsURL         = "https://www.nems.emcsg.com/nems-prices"
-	chromedriverURL = "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
+	nemsURL = "https://www.nems.emcsg.com/nems-prices"
 )
 
 type Parameters struct {
@@ -40,45 +37,24 @@ type Parameters struct {
 
 // }
 
-func getChromeVersion() (string, error) {
-	// Command to get Chrome version on Windows
-	cmd := exec.Command("powershell", "-Command", "(Get-Item 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe').VersionInfo.ProductVersion")
-
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("error getting Chrome version: %v", err)
-	}
-
-	// Trim whitespace and convert to string
-	version := strings.TrimSpace(string(output))
-
-	return version, nil
-}
-
-type DownloadInfo struct {
-	Platform string `json:"platform"`
-	Url      string `json:"url"`
-	// Sha256   string `json:"sha256"`
-}
-
-// type DownloadType struct {
-// 	Chrome       []DownloadInfo `json:"chrome"`
-// 	Chromedriver []DownloadInfo `json:"chrome"`
+// type DownloadInfo struct {
+// 	Platform string `json:"platform"`
+// 	Url      string `json:"url"`
 // }
 
-type VersionEntry struct {
-	Version   string `json:"version"`
-	Revision  string `json:"revision"`
-	Downloads struct {
-		Chrome       []DownloadInfo `json:"chrome"`
-		Chromedriver []DownloadInfo `json:"chromedriver"`
-	} `json:"downloads"`
-}
+// type VersionEntry struct {
+// 	Version   string `json:"version"`
+// 	Revision  string `json:"revision"`
+// 	Downloads struct {
+// 		Chrome       []DownloadInfo `json:"chrome"`
+// 		Chromedriver []DownloadInfo `json:"chromedriver"`
+// 	} `json:"downloads"`
+// }
 
-type KnownGoodVersions struct {
-	Timestamp string         `json:"timestamp"`
-	Versions  []VersionEntry `json:"versions"`
-}
+// type KnownGoodVersions struct {
+// 	Timestamp string         `json:"timestamp"`
+// 	Versions  []VersionEntry `json:"versions"`
+// }
 
 func main() {
 
@@ -93,12 +69,12 @@ func main() {
 	// 	fmt.Println("Chrome Version : ", chromeversion)
 	// }
 
-	response, err := http.Get(chromedriverURL)
-	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
-	}
-	defer response.Body.Close()
+	// response, err := http.Get(chromedriverURL)
+	// if err != nil {
+	// 	fmt.Print(err.Error())
+	// 	os.Exit(1)
+	// }
+	// defer response.Body.Close()
 
 	// var data map[string]map[string]interface{}
 	body, err := io.ReadAll(response.Body)
