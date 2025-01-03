@@ -6,7 +6,8 @@ This repo is created to scrape SG NEMS data for reporting date. Sometimes, UIPat
 
 Steps (GoLang):
 1) Change Date in Parameters.JSON
-2) ./main.exe
+2) in powershell, input the following command
+    $$./main.exe$$ 
 
 
 
@@ -21,9 +22,11 @@ Steps (Python):
 Dependencies:
 1) Python 3.11. Probably works for earlier version. Not tested for anything outside of 3.11
 
-2) Containerisation
-3) Implement test cases (PRIORITY !!!)
+TODO:
+1) Containerisation
+2) Implement test cases (PRIORITY !!!)
+3) CI/CD
 
-
-2024/12/18: Removed chromedriver from local path for testing purposes
-<!-- C:\Users\00492\chromedriver-win64 -->
+Version History:
+v0.2.1: Added ChromeDriverUpdate.go to update Chromedriver
+v0.1.1: TPC Scraping with GoLang. ChromeDriver preinstalled.

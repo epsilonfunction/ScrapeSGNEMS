@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/zip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,7 +9,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
+	"sync"
 )
 
 type DownloadInfo struct {
@@ -49,7 +52,16 @@ const (
 	chromedriverURL = "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
 )
 
-func UpdateChromeDriver() {
+func AsyncChromeUpdate(ch chan error, wg *sync.WaitGroup) {
+
+	defer wg.Done()
+
+	err := UpdateChromeDriver()
+
+	ch <- err // Send the result to the channel
+}
+
+func UpdateChromeDriver() error {
 	// URL that returns pure JSON (even if incorrectly labeled as HTML)
 
 	chromeversion, err := getChromeVersion()
@@ -80,16 +92,86 @@ func UpdateChromeDriver() {
 	}
 
 	// Status Check (200)
-	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("Unexpected HTTP status: %d %s", resp.StatusCode, resp.Status)
+	if response.StatusCode != http.StatusOK {
+		log.Fatalf("Unexpected HTTP status: %d %s", response.StatusCode, response.Status)
 	}
 
-	// Step 2: Decode the JSON into a struct or a generic interface
-	var data map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		log.Fatal("Error decoding JSON:", err)
+	// Finds Chrome Major Version
+	// in 131.0.6778.140, returns 131.0.6778
+	r, err := regexp.Compile(`([\d\.]+)\.\d+$`)
+	if err != nil {
+		log.Fatal("Regex Compilation Error: Unable to compile Chrome Major Version Check")
 	}
 
-	// At this point, 'data' contains your parsed JSON. You can now access fields:
-	fmt.Println("Parsed JSON data:", data)
+	chromeMajorVersion := r.FindStringSubmatch(chromeversion)
+
+	var downloadlink string
+
+	for _, ver := range ChromeData.Versions {
+
+		// fmt.Println(a.Version)
+		apiVersion := r.FindStringSubmatch(ver.Version)
+
+		if chromeMajorVersion[1] == apiVersion[1] {
+			for _, item := range ver.Downloads.Chromedriver {
+				if item.Platform == "win64" {
+					downloadlink = item.Url
+					fmt.Println("Success, ", downloadlink)
+				}
+			}
+		}
+	}
+
+	if downloadlink == "" {
+		log.Fatal("Chromedriver Link not found for this version of Chrome", chromeversion)
+	}
+
+	// Downloading zip file
+	resp, err := http.Get(downloadlink)
+	if err != nil {
+		log.Fatal("Download Failure:", err)
+	}
+
+	// Write the response body to a temporary zip file
+	tempZipFile, err := os.CreateTemp("", "chromedriver-*.zip")
+	if err != nil {
+		log.Fatal("Failed to create temporary file:", err)
+	}
+
+	if _, err := io.Copy(tempZipFile, resp.Body); err != nil {
+		log.Fatal("Failed to write to temporary file:", err)
+	}
+
+	archive, err := zip.OpenReader(tempZipFile.Name())
+	if err != nil {
+		log.Fatal("Fail to open zipfile:", err)
+	}
+
+	// Extract the chromedriver.exe from the zip file
+	for _, f := range archive.File {
+		if f.Name == "chromedriver-win64/chromedriver.exe" {
+			rc, err := f.Open()
+			if err != nil {
+				log.Fatal("Failed to open chromedriver.exe in zipfile:", err)
+			}
+			defer rc.Close()
+
+			localFile, err := os.Create("./chromedriver.exe")
+			if err != nil {
+				log.Fatal("Failed to create local file:", err)
+			}
+			defer localFile.Close()
+
+			if _, err := io.Copy(localFile, rc); err != nil {
+				log.Fatal("Failed to write to local file:", err)
+			}
+
+			fmt.Println("Successfully replaced local chromedriver.exe")
+		}
+	}
+	archive.Close()
+	os.Remove(tempZipFile.Name())
+	resp.Body.Close()
+
+	return nil
 }

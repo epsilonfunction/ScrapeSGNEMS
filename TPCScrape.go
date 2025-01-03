@@ -1,7 +1,6 @@
 package main
 
 import (
-	"archive/zip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,8 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"reflect"
-	"regexp"
+	"time"
 
 	"github.com/tebeka/selenium"
 	"github.com/tebeka/selenium/chrome"
@@ -58,8 +56,6 @@ type Parameters struct {
 
 func main() {
 
-	chromeversion, err := getChromeVersion()
-
 	// if err != nil {
 	// 	panic(err)
 	// 	// fmt.Println("No Chrome Version Found", err)
@@ -77,104 +73,118 @@ func main() {
 	// defer response.Body.Close()
 
 	// var data map[string]map[string]interface{}
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal("Error reading response body:", err)
-	}
+	// body, err := io.ReadAll(response.Body)
+	// if err != nil {
+	// 	log.Fatal("Error reading response body:", err)
+	// }
 
-	fmt.Println(reflect.TypeOf(body))
+	// fmt.Println(reflect.TypeOf(body))
 
-	var data1 KnownGoodVersions
+	// var data1 KnownGoodVersions
 
-	if err := json.Unmarshal(body, &data1); err != nil {
-		log.Fatal("Error Unmarshalling JSON:", err)
-	}
+	// if err := json.Unmarshal(body, &data1); err != nil {
+	// 	log.Fatal("Error Unmarshalling JSON:", err)
+	// }
 
-	// Finds Chrome Major Version
-	// in 131.0.6778.140, returns 131.0.6778
-	r, err := regexp.Compile(`([\d\.]+)\.\d+$`)
-	if err != nil {
-		log.Fatal("Regex Compilation Error: Unable to compile Chrome Major Version Check")
-	}
+	// // Finds Chrome Major Version
+	// // in 131.0.6778.140, returns 131.0.6778
+	// r, err := regexp.Compile(`([\d\.]+)\.\d+$`)
+	// if err != nil {
+	// 	log.Fatal("Regex Compilation Error: Unable to compile Chrome Major Version Check")
+	// }
 
-	chromeMajorVersion := r.FindStringSubmatch(chromeversion)
+	// chromeMajorVersion := r.FindStringSubmatch(chromeversion)
 
-	var downloadlink string
+	// var downloadlink string
 
-	for _, ver := range data1.Versions {
+	// for _, ver := range data1.Versions {
 
-		// fmt.Println(a.Version)
-		apiVersion := r.FindStringSubmatch(ver.Version)
+	// 	// fmt.Println(a.Version)
+	// 	apiVersion := r.FindStringSubmatch(ver.Version)
 
-		if chromeMajorVersion[1] == apiVersion[1] {
-			for _, item := range ver.Downloads.Chromedriver {
-				if item.Platform == "win64" {
-					downloadlink = item.Url
-					fmt.Println("Success, ", downloadlink)
+	// 	if chromeMajorVersion[1] == apiVersion[1] {
+	// 		for _, item := range ver.Downloads.Chromedriver {
+	// 			if item.Platform == "win64" {
+	// 				downloadlink = item.Url
+	// 				fmt.Println("Success, ", downloadlink)
 
-					break
-				}
-			}
-		}
+	// 				break
+	// 			}
+	// 		}
+	// 	}
 
-		if downloadlink != "" {
-			break
-		}
-	}
+	// 	if downloadlink != "" {
+	// 		break
+	// 	}
+	// }
 
-	if downloadlink == "" {
-		log.Fatal("Chromedriver Link not found for this version of Chrome", chromeversion)
-	}
+	// if downloadlink == "" {
+	// 	log.Fatal("Chromedriver Link not found for this version of Chrome", chromeversion)
+	// }
 
-	// Downloading zip file
-	resp, err := http.Get(downloadlink)
-	if err != nil {
-		log.Fatal("Download Failure:", err)
-	}
+	// // Downloading zip file
+	// resp, err := http.Get(downloadlink)
+	// if err != nil {
+	// 	log.Fatal("Download Failure:", err)
+	// }
 
-	// Write the response body to a temporary zip file
-	tempZipFile, err := os.CreateTemp("", "chromedriver-*.zip")
-	if err != nil {
-		log.Fatal("Failed to create temporary file:", err)
-	}
+	// // Write the response body to a temporary zip file
+	// tempZipFile, err := os.CreateTemp("", "chromedriver-*.zip")
+	// if err != nil {
+	// 	log.Fatal("Failed to create temporary file:", err)
+	// }
 
-	if _, err := io.Copy(tempZipFile, resp.Body); err != nil {
-		log.Fatal("Failed to write to temporary file:", err)
-	}
+	// if _, err := io.Copy(tempZipFile, resp.Body); err != nil {
+	// 	log.Fatal("Failed to write to temporary file:", err)
+	// }
 
-	archive, err := zip.OpenReader(tempZipFile.Name())
-	if err != nil {
-		log.Fatal("Fail to open zipfile:", err)
-	}
+	// archive, err := zip.OpenReader(tempZipFile.Name())
+	// if err != nil {
+	// 	log.Fatal("Fail to open zipfile:", err)
+	// }
 
-	// Extract the chromedriver.exe from the zip file
-	for _, f := range archive.File {
-		if f.Name == "chromedriver-win64/chromedriver.exe" {
-			rc, err := f.Open()
-			if err != nil {
-				log.Fatal("Failed to open chromedriver.exe in zipfile:", err)
-			}
-			defer rc.Close()
+	// // Extract the chromedriver.exe from the zip file
+	// for _, f := range archive.File {
+	// 	if f.Name == "chromedriver-win64/chromedriver.exe" {
+	// 		rc, err := f.Open()
+	// 		if err != nil {
+	// 			log.Fatal("Failed to open chromedriver.exe in zipfile:", err)
+	// 		}
+	// 		defer rc.Close()
 
-			localFile, err := os.Create("./chromedriver.exe")
-			if err != nil {
-				log.Fatal("Failed to create local file:", err)
-			}
-			defer localFile.Close()
+	// 		localFile, err := os.Create("./chromedriver.exe")
+	// 		if err != nil {
+	// 			log.Fatal("Failed to create local file:", err)
+	// 		}
+	// 		defer localFile.Close()
 
-			if _, err := io.Copy(localFile, rc); err != nil {
-				log.Fatal("Failed to write to local file:", err)
-			}
+	// 		if _, err := io.Copy(localFile, rc); err != nil {
+	// 			log.Fatal("Failed to write to local file:", err)
+	// 		}
 
-			fmt.Println("Successfully replaced local chromedriver.exe")
-		}
-	}
-	archive.Close()
-	os.Remove(tempZipFile.Name())
-	resp.Body.Close()
+	// 		fmt.Println("Successfully replaced local chromedriver.exe")
+	// 	}
+	// }
+	// archive.Close()
+	// os.Remove(tempZipFile.Name())
+	// resp.Body.Close()
 	// fmt.Println("Chrome Download at: ", found.Downloads.Chromedriver)
 
 	// Set up Chrome options
+
+	err := UpdateChromeDriver()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// ch := make(chan int)
+	// var wg sync.WaitGroup
+	// wg.Add()
+	// go AsyncChromeUpdate(ch, &wg)
+
+	// TODO: Lazy Sleep. Find a more robust way to automate utilisation of chromedriver after sleep.
+	time.Sleep(10)
+
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	chromeCaps := chrome.Capabilities{
 		Args: []string{
@@ -271,7 +281,7 @@ func main() {
 	}
 
 	// Send request
-	resp, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal("Error sending request:", err)
 	}
