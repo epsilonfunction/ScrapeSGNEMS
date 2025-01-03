@@ -7,8 +7,8 @@ This repo is created to scrape SG NEMS data for reporting date. Sometimes, UIPat
 Steps (GoLang):
 1) Change Date in Parameters.JSON
 2) in powershell, input the following command
-    $$./main.exe$$ 
 
+    ./main.exe
 
 
 Steps (Python):
