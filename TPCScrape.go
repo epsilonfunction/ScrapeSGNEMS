@@ -27,7 +27,7 @@ type Parameters struct {
 
 // 	version, err := chrome.GetAttribute()
 // 	if err != nil {
-// 		log.Fatal("Error getting the current Chrome version:", err)
+// 		log.Panic("Error getting the current Chrome version:", err)
 // 	}
 // 	fmt.Printf("System's Chrome version: %s\n", version)
 
@@ -75,7 +75,7 @@ func main() {
 	// var data map[string]map[string]interface{}
 	// body, err := io.ReadAll(response.Body)
 	// if err != nil {
-	// 	log.Fatal("Error reading response body:", err)
+	// 	log.Panic("Error reading response body:", err)
 	// }
 
 	// fmt.Println(reflect.TypeOf(body))
@@ -83,14 +83,14 @@ func main() {
 	// var data1 KnownGoodVersions
 
 	// if err := json.Unmarshal(body, &data1); err != nil {
-	// 	log.Fatal("Error Unmarshalling JSON:", err)
+	// 	log.Panic("Error Unmarshalling JSON:", err)
 	// }
 
 	// // Finds Chrome Major Version
 	// // in 131.0.6778.140, returns 131.0.6778
 	// r, err := regexp.Compile(`([\d\.]+)\.\d+$`)
 	// if err != nil {
-	// 	log.Fatal("Regex Compilation Error: Unable to compile Chrome Major Version Check")
+	// 	log.Panic("Regex Compilation Error: Unable to compile Chrome Major Version Check")
 	// }
 
 	// chromeMajorVersion := r.FindStringSubmatch(chromeversion)
@@ -119,28 +119,28 @@ func main() {
 	// }
 
 	// if downloadlink == "" {
-	// 	log.Fatal("Chromedriver Link not found for this version of Chrome", chromeversion)
+	// 	log.Panic("Chromedriver Link not found for this version of Chrome", chromeversion)
 	// }
 
 	// // Downloading zip file
 	// resp, err := http.Get(downloadlink)
 	// if err != nil {
-	// 	log.Fatal("Download Failure:", err)
+	// 	log.Panic("Download Failure:", err)
 	// }
 
 	// // Write the response body to a temporary zip file
 	// tempZipFile, err := os.CreateTemp("", "chromedriver-*.zip")
 	// if err != nil {
-	// 	log.Fatal("Failed to create temporary file:", err)
+	// 	log.Panic("Failed to create temporary file:", err)
 	// }
 
 	// if _, err := io.Copy(tempZipFile, resp.Body); err != nil {
-	// 	log.Fatal("Failed to write to temporary file:", err)
+	// 	log.Panic("Failed to write to temporary file:", err)
 	// }
 
 	// archive, err := zip.OpenReader(tempZipFile.Name())
 	// if err != nil {
-	// 	log.Fatal("Fail to open zipfile:", err)
+	// 	log.Panic("Fail to open zipfile:", err)
 	// }
 
 	// // Extract the chromedriver.exe from the zip file
@@ -148,18 +148,18 @@ func main() {
 	// 	if f.Name == "chromedriver-win64/chromedriver.exe" {
 	// 		rc, err := f.Open()
 	// 		if err != nil {
-	// 			log.Fatal("Failed to open chromedriver.exe in zipfile:", err)
+	// 			log.Panic("Failed to open chromedriver.exe in zipfile:", err)
 	// 		}
 	// 		defer rc.Close()
 
 	// 		localFile, err := os.Create("./chromedriver.exe")
 	// 		if err != nil {
-	// 			log.Fatal("Failed to create local file:", err)
+	// 			log.Panic("Failed to create local file:", err)
 	// 		}
 	// 		defer localFile.Close()
 
 	// 		if _, err := io.Copy(localFile, rc); err != nil {
-	// 			log.Fatal("Failed to write to local file:", err)
+	// 			log.Panic("Failed to write to local file:", err)
 	// 		}
 
 	// 		fmt.Println("Successfully replaced local chromedriver.exe")
@@ -174,7 +174,7 @@ func main() {
 
 	err := UpdateChromeDriver()
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	// ch := make(chan int)
@@ -196,26 +196,26 @@ func main() {
 	// Start a Selenium WebDriver server instance
 	service, err := selenium.NewChromeDriverService("./chromedriver.exe", 9515)
 	if err != nil {
-		log.Fatal("Error starting the ChromeDriver server:", err)
+		log.Panic("Error starting the ChromeDriver server:", err)
 	}
 	defer service.Stop()
 
 	// Connect to the WebDriver instance
 	driver, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", 9515))
 	if err != nil {
-		log.Fatal("Error connecting to the WebDriver:", err)
+		log.Panic("Error connecting to the WebDriver:", err)
 	}
 	defer driver.Quit()
 
 	// Navigate to the URL
 	if err := driver.Get(nemsURL); err != nil {
-		log.Fatal("Error navigating to the URL:", err)
+		log.Panic("Error navigating to the URL:", err)
 	}
 
 	// Get cookies
 	seleniumCookies, err := driver.GetCookies()
 	if err != nil {
-		log.Fatal("Error getting cookies:", err)
+		log.Panic("Error getting cookies:", err)
 	}
 	cookies := make([]*http.Cookie, len(seleniumCookies))
 	for i, cookie := range seleniumCookies {
@@ -228,31 +228,31 @@ func main() {
 	// Find the form element
 	formElem, err := driver.FindElement(selenium.ByXPATH, "//form[@action='/api/sitecore/DataSync/DataDownload']")
 	if err != nil {
-		log.Fatal("Error finding form element:", err)
+		log.Panic("Error finding form element:", err)
 	}
 
 	// Load parameters from JSON file
 	file, err := os.Open("Parameters.json")
 	if err != nil {
-		log.Fatal("Error opening Parameters.json:", err)
+		log.Panic("Error opening Parameters.json:", err)
 	}
 	defer file.Close()
 
 	var params Parameters
 	if err := json.NewDecoder(file).Decode(&params); err != nil {
-		log.Fatal("Error decoding JSON:", err)
+		log.Panic("Error decoding JSON:", err)
 	}
 
 	// Get form action URL
 	formActionURL, err := formElem.GetAttribute("action")
 	if err != nil {
-		log.Fatal("Error getting form action URL:", err)
+		log.Panic("Error getting form action URL:", err)
 	}
 
 	// Construct full URL
 	fullURL, err := url.Parse(formActionURL)
 	if err != nil {
-		log.Fatal("Error parsing form action URL:", err)
+		log.Panic("Error parsing form action URL:", err)
 	}
 	query := fullURL.Query()
 	for key, value := range params.Parameters {
@@ -263,14 +263,14 @@ func main() {
 	// Get user agent
 	userAgent, err := driver.ExecuteScript("return navigator.userAgent;", nil)
 	if err != nil {
-		log.Fatal("Error getting user agent:", err)
+		log.Panic("Error getting user agent:", err)
 	}
 
 	// Create HTTP client and request
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", fullURL.String(), nil)
 	if err != nil {
-		log.Fatal("Error creating request:", err)
+		log.Panic("Error creating request:", err)
 	}
 
 	// Set headers and cookies
@@ -283,25 +283,25 @@ func main() {
 	// Send request
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error sending request:", err)
+		log.Panic("Error sending request:", err)
 	}
 	defer resp.Body.Close()
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("Unexpected status code: %d", resp.StatusCode)
+		log.Panicf("Unexpected status code: %d", resp.StatusCode)
 	}
 
 	// Write response to file
 	file, err = os.Create(params.Filepath)
 	if err != nil {
-		log.Fatal("Error creating file:", err)
+		log.Panic("Error creating file:", err)
 	}
 	defer file.Close()
 
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
-		log.Fatal("Error writing to file:", err)
+		log.Panic("Error writing to file:", err)
 	}
 
 	fmt.Println("Data successfully downloaded and saved.")
